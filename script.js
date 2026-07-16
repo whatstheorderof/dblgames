@@ -1,16 +1,42 @@
 // ============================================================
-// deathbyleisuregames — app logic
-// Grid rendering, search, category filter, player view,
-// hash routing (#play=slug), recently played (localStorage).
+// DBL Games — app logic
+// Combined catalog (curated + generated), chunked grid render,
+// search, categories, player view, ?g= routing, favorites,
+// recently played, random game.
 // ============================================================
 
 (function () {
   "use strict";
 
+  // ---------- catalog ----------
+  const slugify = s => s.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+  const CATALOG = GAMES.map(g => ({
+    title: g.title, cat: g.cat, featured: !!g.featured,
+    embed: g.embed, img: g.img, slug: g.slug
+  }));
+  if (typeof MORE_GAMES !== "undefined") {
+    const have = new Set(CATALOG.map(g => g.slug));
+    for (const m of MORE_GAMES) {
+      const slug = slugify(m.t);
+      if (have.has(slug)) continue;
+      have.add(slug);
+      CATALOG.push({
+        title: m.t, cat: m.c, featured: false, slug,
+        embed: "https://html5.gamemonetize.co/" + m.h + "/",
+        img: "https://img.gamemonetize.com/" + m.h + "/512x384.jpg"
+      });
+    }
+  }
+  const BY_SLUG = new Map(CATALOG.map(g => [g.slug, g]));
+
+  // ---------- dom ----------
   const grid        = document.getElementById("gameGrid");
   const relatedGrid = document.getElementById("relatedGrid");
   const recentGrid  = document.getElementById("recentGrid");
   const recentWrap  = document.getElementById("recentWrap");
+  const favGrid     = document.getElementById("favGrid");
+  const favWrap     = document.getElementById("favWrap");
   const noResults   = document.getElementById("noResults");
   const home        = document.getElementById("home");
   const player      = document.getElementById("player");
@@ -18,16 +44,33 @@
   const playerTitle = document.getElementById("playerTitle");
   const searchInput = document.getElementById("searchInput");
   const catBar      = document.getElementById("catBar");
+  const sentinel    = document.getElementById("loadMore");
+  const favBtn      = document.getElementById("favBtn");
+  const metaDesc    = document.querySelector('meta[name="description"]');
 
+  const CHUNK = 120;
   let activeCat = "all";
   let query = "";
+  let filtered = [];
+  let rendered = 0;
+  let currentGame = null;
+
+  // ---------- storage helpers ----------
+  const store = {
+    get(k) { try { return JSON.parse(localStorage.getItem(k) || "[]"); } catch { return []; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+  };
 
   // ---------- tile factory ----------
   function makeTile(game, { small = false } = {}) {
     const tile = document.createElement("a");
     tile.className = "tile" + (game.featured && !small ? " featured" : "");
-    tile.href = "#play=" + game.slug;
+    tile.href = "?g=" + game.slug;
     tile.setAttribute("aria-label", "Play " + game.title);
+    tile.addEventListener("click", (e) => {
+      e.preventDefault();
+      openBySlug(game.slug, true);
+    });
 
     const img = document.createElement("img");
     img.src = game.img;
@@ -47,89 +90,137 @@
     return tile;
   }
 
-  // ---------- grid rendering ----------
-  function renderGrid() {
-    grid.innerHTML = "";
+  // ---------- grid rendering (chunked) ----------
+  function computeFiltered() {
     const q = query.trim().toLowerCase();
-    const list = GAMES.filter(g =>
+    filtered = CATALOG.filter(g =>
       (activeCat === "all" || g.cat === activeCat) &&
       (!q || g.title.toLowerCase().includes(q))
     );
-    list.forEach(g => grid.appendChild(makeTile(g)));
-    noResults.hidden = list.length > 0;
-    renderRecent();
   }
+  function renderChunk() {
+    const frag = document.createDocumentFragment();
+    const end = Math.min(rendered + CHUNK, filtered.length);
+    for (let i = rendered; i < end; i++) frag.appendChild(makeTile(filtered[i]));
+    rendered = end;
+    grid.appendChild(frag);
+    sentinel.hidden = rendered >= filtered.length;
+  }
+  function renderGrid() {
+    computeFiltered();
+    grid.innerHTML = "";
+    rendered = 0;
+    renderChunk();
+    noResults.hidden = filtered.length > 0;
+    renderRows();
+  }
+  new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting && rendered < filtered.length) renderChunk();
+  }, { rootMargin: "600px" }).observe(sentinel);
 
-  // ---------- recently played ----------
-  function getRecent() {
-    try { return JSON.parse(localStorage.getItem("dblg-recent") || "[]"); }
-    catch { return []; }
+  // ---------- recent + favorites rows ----------
+  function renderRow(key, wrap, rowGrid) {
+    const items = store.get(key).map(s => BY_SLUG.get(s)).filter(Boolean);
+    const show = items.length > 0 && activeCat === "all" && !query.trim();
+    wrap.hidden = !show;
+    if (!show) return;
+    rowGrid.innerHTML = "";
+    items.forEach(g => rowGrid.appendChild(makeTile(g, { small: true })));
+  }
+  function renderRows() {
+    renderRow("dblg-recent", recentWrap, recentGrid);
+    renderRow("dblg-favs", favWrap, favGrid);
   }
   function pushRecent(slug) {
-    const rec = getRecent().filter(s => s !== slug);
+    const rec = store.get("dblg-recent").filter(s => s !== slug);
     rec.unshift(slug);
-    try { localStorage.setItem("dblg-recent", JSON.stringify(rec.slice(0, 8))); }
-    catch { /* storage unavailable — fine */ }
-  }
-  function renderRecent() {
-    const rec = getRecent()
-      .map(s => GAMES.find(g => g.slug === s))
-      .filter(Boolean);
-    const show = rec.length > 0 && activeCat === "all" && !query.trim();
-    recentWrap.hidden = !show;
-    if (!show) return;
-    recentGrid.innerHTML = "";
-    rec.forEach(g => recentGrid.appendChild(makeTile(g, { small: true })));
+    store.set("dblg-recent", rec.slice(0, 8));
   }
 
+  // ---------- favorites ----------
+  function isFav(slug) { return store.get("dblg-favs").includes(slug); }
+  function syncFavBtn() {
+    if (!currentGame) return;
+    favBtn.textContent = isFav(currentGame.slug) ? "★ Favorited" : "☆ Favorite";
+  }
+  favBtn.addEventListener("click", () => {
+    if (!currentGame) return;
+    let favs = store.get("dblg-favs");
+    favs = favs.includes(currentGame.slug)
+      ? favs.filter(s => s !== currentGame.slug)
+      : [currentGame.slug, ...favs].slice(0, 16);
+    store.set("dblg-favs", favs);
+    syncFavBtn();
+  });
+
   // ---------- player ----------
-  function openGame(game) {
+  function openGame(game, pushState) {
+    currentGame = game;
     playerTitle.textContent = game.title;
     frame.src = game.embed;
     home.hidden = true;
     player.hidden = false;
-    document.title = game.title + " — DBL Games";
+    document.title = game.title + " unblocked — DBL Games";
+    if (metaDesc) metaDesc.setAttribute("content",
+      "Play " + game.title + " unblocked online for free at DBL Games. No download needed.");
     window.scrollTo({ top: 0 });
     pushRecent(game.slug);
+    syncFavBtn();
+    if (pushState) history.pushState({ g: game.slug }, "", "?g=" + game.slug);
 
-    // related: same category first, then fill with others
-    const pool = GAMES.filter(g => g.slug !== game.slug);
-    const related = pool.filter(g => g.cat === game.cat)
-      .concat(pool.filter(g => g.cat !== game.cat))
-      .slice(0, 8);
+    const pool = CATALOG.filter(g => g.slug !== game.slug);
+    const related = pool.filter(g => g.cat === game.cat).slice(0, 8);
+    let i = 0;
+    while (related.length < 8 && i < pool.length) {
+      if (pool[i].cat !== game.cat) related.push(pool[i]);
+      i++;
+    }
     relatedGrid.innerHTML = "";
     related.forEach(g => relatedGrid.appendChild(makeTile(g, { small: true })));
   }
-
-  function closeGame() {
+  function closeGame(pushState) {
+    currentGame = null;
     frame.src = "about:blank"; // stop game audio/CPU
     player.hidden = true;
     home.hidden = false;
     document.title = "DBL Games — play free unblocked games online";
-    renderRecent();
+    if (metaDesc) metaDesc.setAttribute("content",
+      "Play " + CATALOG.length + "+ free unblocked games online. Driving, shooting, arcade, puzzle, brain training, clicker, minecraft and 2 player games. No downloads.");
+    if (pushState) history.pushState({}, "", location.pathname);
+    renderRows();
+  }
+  function openBySlug(slug, pushState) {
+    const game = BY_SLUG.get(slug);
+    if (game) openGame(game, pushState);
+    else closeGame(pushState);
   }
 
-  // ---------- hash routing ----------
+  // ---------- routing: ?g=slug (legacy #play= also honored) ----------
   function route() {
-    const m = location.hash.match(/^#play=([\w-]+)$/);
-    const game = m && GAMES.find(g => g.slug === m[1]);
-    if (game) openGame(game);
-    else closeGame();
+    const qs = new URLSearchParams(location.search).get("g");
+    const legacy = (location.hash.match(/^#play=([\w-]+)$/) || [])[1];
+    const slug = qs || legacy;
+    if (slug && BY_SLUG.has(slug)) openGame(BY_SLUG.get(slug), false);
+    else closeGame(false);
   }
+  window.addEventListener("popstate", route);
   window.addEventListener("hashchange", route);
 
   // ---------- events ----------
-  document.getElementById("backBtn").addEventListener("click", () => {
-    location.hash = "";
-  });
+  document.getElementById("backBtn").addEventListener("click", () => closeGame(true));
   document.getElementById("logoLink").addEventListener("click", (e) => {
     e.preventDefault();
-    location.hash = "";
     activeCat = "all";
     query = "";
     searchInput.value = "";
     syncChips();
+    closeGame(true);
     renderGrid();
+  });
+
+  document.getElementById("randomBtn").addEventListener("click", () => {
+    const g = CATALOG[Math.floor(Math.random() * CATALOG.length)];
+    openGame(g, true);
   });
 
   document.getElementById("fsBtn").addEventListener("click", () => {
@@ -141,7 +232,7 @@
 
   searchInput.addEventListener("input", () => {
     query = searchInput.value;
-    if (!player.hidden) location.hash = ""; // typing returns to grid
+    if (!player.hidden) closeGame(true);
     renderGrid();
   });
 
@@ -154,11 +245,13 @@
     if (!chip) return;
     activeCat = chip.dataset.cat;
     syncChips();
-    if (!player.hidden) location.hash = "";
+    if (!player.hidden) closeGame(true);
     renderGrid();
   });
 
   // ---------- boot ----------
+  const counter = document.getElementById("gameCount");
+  if (counter) counter.textContent = CATALOG.length + " games and counting";
   renderGrid();
-  route(); // handle direct links like index.html#play=drift-king
+  route(); // supports direct links: /?g=drift-king
 })();

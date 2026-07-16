@@ -1,0 +1,6 @@
+# DBL Games
+# TODO: replace dblgames.com with your real domain
+User-agent: *
+Allow: /
+
+Sitemap: https://dblgames.com/sitemap.xml

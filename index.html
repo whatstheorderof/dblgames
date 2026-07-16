@@ -3,13 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- ============ SEO ============ -->
   <title>DBL Games — play free unblocked games online</title>
-  <meta name="description" content="Play 80+ free unblocked games online. Driving, shooting, arcade, puzzle, clicker, minecraft and 2 player games. No downloads — click a tile and play.">
-  <meta name="keywords" content="unblocked games, free online games, browser games, unblocked games at school">
+  <meta name="description" content="Play 1800+ free unblocked games online. Driving, shooting, arcade, puzzle, brain training, clicker, minecraft and 2 player games. No downloads — click a tile and play.">
+  <meta name="keywords" content="unblocked games, free online games, browser games, unblocked games at school, brain training games">
+  <meta name="robots" content="index, follow">
+  <!-- TODO: set your real domain here and in sitemap.xml / robots.txt -->
+  <link rel="canonical" href="https://dblgames.com/">
+  <meta property="og:site_name" content="DBL Games">
   <meta property="og:title" content="DBL Games — free unblocked games">
-  <meta property="og:description" content="Any tile you click, you can play. Free browser games, no downloads.">
+  <meta property="og:description" content="1800+ free browser games. Any tile you click, you can play.">
   <meta property="og:type" content="website">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💀</text></svg>">
+  <meta property="og:url" content="https://dblgames.com/">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="DBL Games — free unblocked games">
+  <meta name="twitter:description" content="1800+ free browser games. No downloads.">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "DBL Games",
+    "url": "https://dblgames.com/",
+    "description": "Free unblocked browser games — driving, shooting, arcade, puzzle, brain training and more.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://dblgames.com/?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+
+  <!-- ============ ICONS ============ -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="apple-touch-icon" href="favicon.svg">
+  <meta name="theme-color" content="#0e1512">
+
   <link rel="stylesheet" href="style.css">
 
   <!-- =====================================================
@@ -24,12 +53,13 @@
 <body>
 
   <header class="site-header">
-    <a class="logo" href="#" id="logoLink">
+    <a class="logo" href="/" id="logoLink">
       <span class="logo-skull">💀</span>
       <span class="logo-text">dbl<span>games</span></span>
     </a>
+    <button class="player-btn random-btn" id="randomBtn" title="Play a random game">🎲 Random</button>
     <div class="search-wrap">
-      <input type="search" id="searchInput" placeholder="Search games…" autocomplete="off" aria-label="Search games">
+      <input type="search" id="searchInput" placeholder="Search 1800+ games…" autocomplete="off" aria-label="Search games">
     </div>
   </header>
 
@@ -38,8 +68,9 @@
     <button class="cat-chip" data-cat="driving">🏎️ Driving</button>
     <button class="cat-chip" data-cat="shooting">🔫 Shooting</button>
     <button class="cat-chip" data-cat="arcade">🕹️ Arcade</button>
-    <button class="cat-chip" data-cat="sports">🏀 Sports</button>
+    <button class="cat-chip" data-cat="brain">🧠 Brain</button>
     <button class="cat-chip" data-cat="puzzle">🧩 Puzzle</button>
+    <button class="cat-chip" data-cat="sports">🏀 Sports</button>
     <button class="cat-chip" data-cat="clicker">👆 Clicker</button>
     <button class="cat-chip" data-cat="minecraft">⛏️ Minecraft</button>
     <button class="cat-chip" data-cat="2player">👥 2 Player</button>
@@ -55,7 +86,8 @@
   <section class="player" id="player" hidden>
     <div class="player-bar">
       <button class="player-btn" id="backBtn">← Back to games</button>
-      <h1 class="player-title" id="playerTitle"></h1>
+      <h2 class="player-title" id="playerTitle"></h2>
+      <button class="player-btn" id="favBtn">☆ Favorite</button>
       <button class="player-btn" id="fsBtn">⛶ Fullscreen</button>
     </div>
     <div class="player-frame-wrap" id="frameWrap">
@@ -75,12 +107,27 @@
 
   <!-- ============ HOME: GAME GRID ============ -->
   <main class="home" id="home">
+    <section class="recent-wrap" id="favWrap" hidden>
+      <h2>Favorites</h2>
+      <div class="grid grid-small" id="favGrid"></div>
+    </section>
     <section class="recent-wrap" id="recentWrap" hidden>
       <h2>Recently played</h2>
       <div class="grid grid-small" id="recentGrid"></div>
     </section>
     <div class="grid" id="gameGrid"></div>
+    <div class="load-more" id="loadMore" hidden>Loading more games…</div>
     <p class="no-results" id="noResults" hidden>No games found. Try another search.</p>
+
+    <!-- ============ SEO TEXT ============ -->
+    <section class="seo-text">
+      <h1>DBL Games — Free Unblocked Games Online</h1>
+      <p>DBL Games is a free online games site where every tile you click is instantly playable — no downloads, no sign-ups, no installs. Play <span id="gameCount">1800+ games</span> right in your browser: driving and drift games, shooting and FPS games, arcade classics, Minecraft-style crafting games, clicker and idle games, simulators, horror games and 2 player games to share a keyboard with a friend.</p>
+      <h2>Brain training games</h2>
+      <p>Give your brain a workout with our brain category: math games, memory games, chess, checkers, sudoku-style logic puzzles, word games and quiz games. Short sessions, quick thinking — perfect for a study break.</p>
+      <h2>How it works</h2>
+      <p>Click any tile to start playing immediately. Use the search bar to find a specific title, the category chips to browse by genre, or the Random button when you can't decide. Your favorites and recently played games are saved on your device so you can jump back in anytime.</p>
+    </section>
   </main>
 
   <footer class="site-footer">
@@ -89,6 +136,7 @@
   </footer>
 
   <script src="games.js"></script>
+  <script src="more-games.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

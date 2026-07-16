@@ -218,6 +218,31 @@ body {
 
 .related { margin-top: 26px; }
 
+/* ---------- load more sentinel ---------- */
+.load-more {
+  text-align: center;
+  color: var(--text-dim);
+  padding: 24px 0;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+/* ---------- random button ---------- */
+.random-btn { flex: 0 0 auto; }
+
+/* ---------- seo text ---------- */
+.seo-text {
+  max-width: 900px;
+  margin: 48px auto 0;
+  color: var(--text-dim);
+  font-size: 14.5px;
+  line-height: 1.7;
+  border-top: 1px solid #223229;
+  padding-top: 28px;
+}
+.seo-text h1 { font-size: 20px; color: var(--text); margin-bottom: 10px; }
+.seo-text h2 { font-size: 16px; color: var(--text); margin: 18px 0 8px; }
+
 /* ---------- footer ---------- */
 .site-footer {
   border-top: 1px solid #223229;
