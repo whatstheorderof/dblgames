@@ -107,6 +107,19 @@
 
   <!-- ============ HOME: GAME GRID ============ -->
   <main class="home" id="home">
+
+    <!-- ============ SPOTLIGHT ============ -->
+    <section class="spotlight" id="spotlight">
+      <div class="spotlight-head">
+        <h2>Spotlight</h2>
+        <div class="spot-tabs" role="tablist">
+          <button class="spot-tab active" data-list="reviewed" role="tab">⭐ Highest Reviewed</button>
+          <button class="spot-tab" data-list="played" role="tab">🔥 Most Played</button>
+        </div>
+      </div>
+      <div class="spotlight-row" id="spotlightRow"></div>
+    </section>
+
     <section class="recent-wrap" id="favWrap" hidden>
       <h2>Favorites</h2>
       <div class="grid grid-small" id="favGrid"></div>
@@ -138,5 +151,11 @@
   <script src="games.js"></script>
   <script src="more-games.js"></script>
   <script src="script.js"></script>
+
+  <!-- Vercel Web Analytics (works when deployed on Vercel with
+       Analytics enabled in the dashboard). The @vercel/analytics
+       npm package in package.json is the framework equivalent —
+       for this static site, this script tag is the integration. -->
+  <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>

@@ -118,6 +118,58 @@
     if (entries[0].isIntersecting && rendered < filtered.length) renderChunk();
   }, { rootMargin: "600px" }).observe(sentinel);
 
+  // ---------- spotlight banner ----------
+  const spotlight = document.getElementById("spotlight");
+  const spotlightRow = document.getElementById("spotlightRow");
+  let spotList = "reviewed";
+
+  function makeSpotCard(game, rank) {
+    const card = document.createElement("a");
+    card.className = "spot-card";
+    card.href = "?g=" + game.slug;
+    card.setAttribute("aria-label", "Play " + game.title);
+    card.addEventListener("click", (e) => {
+      e.preventDefault();
+      openBySlug(game.slug, true);
+    });
+    const img = document.createElement("img");
+    img.src = game.img;
+    img.alt = game.title;
+    img.loading = "lazy";
+    const info = document.createElement("div");
+    info.className = "spot-info";
+    const num = document.createElement("span");
+    num.className = "spot-rank";
+    num.textContent = "#" + rank;
+    const name = document.createElement("span");
+    name.className = "spot-name";
+    name.textContent = game.title;
+    const play = document.createElement("span");
+    play.className = "spot-play";
+    play.textContent = "▶ Play";
+    info.append(num, name, play);
+    card.append(img, info);
+    return card;
+  }
+  function renderSpotlight() {
+    if (typeof SPOTLIGHT === "undefined") { spotlight.hidden = true; return; }
+    const slugs = SPOTLIGHT[spotList] || [];
+    const games = slugs.map(s => BY_SLUG.get(s)).filter(Boolean);
+    spotlight.hidden = games.length === 0 || activeCat !== "all" || !!query.trim();
+    if (spotlight.hidden) return;
+    spotlightRow.innerHTML = "";
+    games.forEach((g, i) => spotlightRow.appendChild(makeSpotCard(g, i + 1)));
+    spotlightRow.scrollLeft = 0;
+  }
+  document.querySelectorAll(".spot-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      spotList = tab.dataset.list;
+      document.querySelectorAll(".spot-tab").forEach(t =>
+        t.classList.toggle("active", t === tab));
+      renderSpotlight();
+    });
+  });
+
   // ---------- recent + favorites rows ----------
   function renderRow(key, wrap, rowGrid) {
     const items = store.get(key).map(s => BY_SLUG.get(s)).filter(Boolean);
@@ -128,6 +180,7 @@
     items.forEach(g => rowGrid.appendChild(makeTile(g, { small: true })));
   }
   function renderRows() {
+    renderSpotlight();
     renderRow("dblg-recent", recentWrap, recentGrid);
     renderRow("dblg-favs", favWrap, favGrid);
   }
