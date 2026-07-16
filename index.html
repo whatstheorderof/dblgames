@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DBL Games — play free unblocked games online</title>
+  <meta name="description" content="Play 80+ free unblocked games online. Driving, shooting, arcade, puzzle, clicker, minecraft and 2 player games. No downloads — click a tile and play.">
+  <meta name="keywords" content="unblocked games, free online games, browser games, unblocked games at school">
+  <meta property="og:title" content="DBL Games — free unblocked games">
+  <meta property="og:description" content="Any tile you click, you can play. Free browser games, no downloads.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💀</text></svg>">
+  <link rel="stylesheet" href="style.css">
+
+  <!-- =====================================================
+       GOOGLE ADSENSE
+       1. Get approved at https://adsense.google.com
+       2. Paste your script tag below, replacing the comment:
+       <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+       3. Replace the .ad-slot placeholder divs in the body
+          with your ad unit <ins> code.
+       ===================================================== -->
+</head>
+<body>
+
+  <header class="site-header">
+    <a class="logo" href="#" id="logoLink">
+      <span class="logo-skull">💀</span>
+      <span class="logo-text">dbl<span>games</span></span>
+    </a>
+    <div class="search-wrap">
+      <input type="search" id="searchInput" placeholder="Search games…" autocomplete="off" aria-label="Search games">
+    </div>
+  </header>
+
+  <nav class="cat-bar" id="catBar" aria-label="Game categories">
+    <button class="cat-chip active" data-cat="all">All</button>
+    <button class="cat-chip" data-cat="driving">🏎️ Driving</button>
+    <button class="cat-chip" data-cat="shooting">🔫 Shooting</button>
+    <button class="cat-chip" data-cat="arcade">🕹️ Arcade</button>
+    <button class="cat-chip" data-cat="sports">🏀 Sports</button>
+    <button class="cat-chip" data-cat="puzzle">🧩 Puzzle</button>
+    <button class="cat-chip" data-cat="clicker">👆 Clicker</button>
+    <button class="cat-chip" data-cat="minecraft">⛏️ Minecraft</button>
+    <button class="cat-chip" data-cat="2player">👥 2 Player</button>
+    <button class="cat-chip" data-cat="sim">🏗️ Simulator</button>
+    <button class="cat-chip" data-cat="horror">👻 Horror</button>
+    <button class="cat-chip" data-cat="girls">💅 Girls</button>
+  </nav>
+
+  <!-- Ad slot: leaderboard. Replace with your AdSense <ins> unit. -->
+  <div class="ad-slot ad-leaderboard" aria-hidden="true">Advertisement</div>
+
+  <!-- ============ GAME PLAYER (hidden until a game opens) ============ -->
+  <section class="player" id="player" hidden>
+    <div class="player-bar">
+      <button class="player-btn" id="backBtn">← Back to games</button>
+      <h1 class="player-title" id="playerTitle"></h1>
+      <button class="player-btn" id="fsBtn">⛶ Fullscreen</button>
+    </div>
+    <div class="player-frame-wrap" id="frameWrap">
+      <iframe id="gameFrame" title="Game" allow="fullscreen; autoplay; gamepad"
+              sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-popups allow-forms"
+              scrolling="no" frameborder="0"></iframe>
+    </div>
+    <div class="player-under">
+      <!-- Ad slot: under-game banner. Replace with your AdSense <ins> unit. -->
+      <div class="ad-slot ad-under" aria-hidden="true">Advertisement</div>
+    </div>
+    <section class="related">
+      <h2>More games</h2>
+      <div class="grid grid-small" id="relatedGrid"></div>
+    </section>
+  </section>
+
+  <!-- ============ HOME: GAME GRID ============ -->
+  <main class="home" id="home">
+    <section class="recent-wrap" id="recentWrap" hidden>
+      <h2>Recently played</h2>
+      <div class="grid grid-small" id="recentGrid"></div>
+    </section>
+    <div class="grid" id="gameGrid"></div>
+    <p class="no-results" id="noResults" hidden>No games found. Try another search.</p>
+  </main>
+
+  <footer class="site-footer">
+    <p><strong>DBL Games</strong> — free browser games. any tile you click, you can play.</p>
+    <p class="fine">Games embedded via the free publisher programs of OnlineGames.io and GameMonetize, and TurboWarp/Scratch (CC BY-SA). All trademarks belong to their owners.</p>
+  </footer>
+
+  <script src="games.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
